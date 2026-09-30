@@ -1,0 +1,218 @@
+const fs = require('fs');
+let html = fs.readFileSync('index.html', 'utf8');
+
+const startTag = '<main id="lockSection"';
+const endTag = '<div id="toastNotification"';
+const startIndex = html.indexOf(startTag);
+const endIndex = html.indexOf(endTag);
+
+if (startIndex === -1 || endIndex === -1) {
+  console.log('Error: Could not find tags.');
+  process.exit(1);
+}
+
+const newHTML = `
+<!-- ========================================================
+   CUTE DREAMY LOCKSCREEN
+======================================================== -->
+<main id="lockSection" class="w-full max-w-sm mx-auto my-auto relative z-20 transition-all duration-1000 ease-out">
+    <div class="relative bg-white/95 backdrop-blur-3xl rounded-[40px] p-8 sm:p-10 text-center border-4 border-white shadow-[0_20px_50px_rgba(30,58,138,0.3)] overflow-hidden">
+        <!-- Cute glowing orb -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-pink-300/40 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex justify-center mb-6 relative">
+            <div class="hover:scale-110 transition-transform duration-500 cursor-pointer" onclick="focusPasswordInput()">
+                <div class="bg-gradient-to-br from-pink-200 to-sky-200 w-24 h-24 rounded-[32px] flex items-center justify-center shadow-xl border-4 border-white rotate-6 hover:rotate-0 transition-transform">
+                    <span class="text-5xl filter drop-shadow-sm">💌</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-1 mb-6">
+            <h2 class="text-sm sm:text-base font-extrabold text-sky-900 font-vietnam tracking-wide">
+                Đoàn Khoa Tài Chính - Ngân Hàng
+            </h2>
+            <h3 class="text-xs font-bold text-sky-700/80 font-vietnam tracking-wide">
+                Ban Phong Trào - Tình Nguyện
+            </h3>
+        </div>
+
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-50 border-2 border-sky-100 text-sky-600 text-xs font-bold tracking-wide mb-6 shadow-sm">
+            <span>✨</span> #PhongTinhwithlove <span>✨</span>
+        </div>
+
+        <h1 class="text-2xl sm:text-3xl font-extrabold font-vietnam text-sky-950 tracking-tight mb-8 leading-tight">
+            Gặp Mặt <br/><span class="text-sky-500">Tân CTV 2026</span> 🧸
+        </h1>
+
+        <form onsubmit="handleAuthenticate(event)" class="text-left space-y-5">
+            <div>
+                <label for="inputPassword" class="block text-[11px] text-sky-800 tracking-wide font-extrabold mb-2 pl-2">
+                    Sinh nhật của Anh/Chị là ngày mấy ta? 🎂
+                </label>
+                <input type="text" id="inputPassword" placeholder="DD / MM / YYYY" autocomplete="off"
+                    class="w-full bg-slate-50 border-2 border-sky-200 rounded-3xl px-5 py-4 text-sky-950 placeholder-sky-400 focus:outline-none focus:ring-4 focus:ring-pink-300/50 focus:border-pink-300 transition-all font-extrabold text-center text-lg tracking-wide shadow-inner" />
+            </div>
+
+            <div id="errorNotification" class="hidden p-3.5 rounded-2xl bg-rose-100 border-2 border-rose-200 text-rose-600 text-xs font-bold flex items-center gap-3">
+                <span class="text-lg">🥺</span>
+                <span>Ôi, hình như ngày sinh chưa đúng rồi!</span>
+            </div>
+
+            <button type="submit" id="btnSubmitUnlock" class="w-full group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-sky-400 to-pink-400 hover:from-sky-300 hover:to-pink-300 text-white font-extrabold py-4 px-8 rounded-3xl transition-all duration-300 hover:shadow-[0_10px_25px_rgba(236,72,153,0.3)] overflow-hidden cursor-pointer hover:-translate-y-1">
+                <span class="tracking-wide text-sm z-10">Mở Thư Mời Nè</span>
+                <span class="z-10 group-hover:translate-x-1 transition-transform text-lg">🚀</span>
+            </button>
+        </form>
+    </div>
+</main>
+
+<main id="cardSection" class="w-full max-w-3xl mx-auto my-4 sm:my-8 hidden opacity-0 translate-y-10 transition-all duration-1000 ease-out z-20">
+    <!-- Action Toolbar -->
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6 no-print px-2">
+        <button onclick="relockEnvelope()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/95 hover:bg-white text-sky-950 text-sm font-bold backdrop-blur-xl border-2 border-white transition-all cursor-pointer shadow-md">
+            <span>👈</span> Đổi người khác
+        </button>
+        <div class="flex items-center gap-3">
+            <button onclick="exportHighResInvitation()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-sky-400 hover:bg-sky-300 text-white text-sm font-extrabold shadow-lg transition-all cursor-pointer border-2 border-sky-300">
+                <span>📸</span> Tải ảnh xịn
+            </button>
+            <button onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/95 hover:bg-white text-sky-950 text-sm font-bold backdrop-blur-xl border-2 border-white transition-all cursor-pointer shadow-md">
+                <span>🖨️</span> In
+            </button>
+        </div>
+    </div>
+
+    <!-- Card Container -->
+    <div id="printContainer" class="bg-white/95 backdrop-blur-3xl rounded-[48px] p-2 sm:p-4 shadow-[0_20px_60px_rgba(30,58,138,0.2)] relative overflow-hidden border-4 border-white">
+        
+        <div class="border-2 border-pink-100 rounded-[36px] p-6 sm:p-10 lg:p-12 bg-white relative z-10">
+            <!-- Header -->
+            <header class="text-center mb-8">
+                <h2 class="text-[10px] sm:text-xs font-extrabold text-sky-400 tracking-wide font-vietnam">
+                    Đoàn Khoa Tài Chính - Ngân Hàng
+                </h2>
+                <h3 class="text-xs sm:text-sm font-bold text-sky-900 mt-1 font-vietnam">
+                    Ban Phong Trào - Tình Nguyện
+                </h3>
+                
+                <div class="flex items-center justify-center gap-4 my-5">
+                    <div class="h-1 w-12 bg-pink-100 rounded-full"></div>
+                    <span class="text-2xl filter drop-shadow-sm">☁️</span>
+                    <div class="h-1 w-12 bg-pink-100 rounded-full"></div>
+                </div>
+                
+                <div class="inline-flex items-center justify-center px-6 py-1.5 rounded-full bg-pink-50 text-pink-500 text-xs font-extrabold tracking-wide mb-4 shadow-inner border border-pink-100">
+                    Thư Mời Nhỏ Xinh
+                </div>
+                
+                <h1 class="text-2xl sm:text-4xl font-extrabold font-vietnam text-sky-950 leading-tight">
+                    Buổi Gặp Mặt<br/><span class="text-sky-500 text-3xl sm:text-5xl">Tân Cộng Tác Viên 2026</span>
+                </h1>
+                
+                <div class="mt-5">
+                    <span class="inline-block font-vietnam font-bold text-xs sm:text-sm text-sky-500 tracking-wide px-4 py-2 rounded-full bg-sky-50/50 border-2 border-sky-100/50">
+                        ✨ #PhongTinhwithlove ✨
+                    </span>
+                </div>
+            </header>
+
+            <!-- Guest Plaque -->
+            <div class="bg-gradient-to-b from-sky-50 to-pink-50 border-2 border-pink-100 rounded-[32px] p-8 mb-8 text-center shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-sky-300 via-pink-300 to-sky-300"></div>
+                <p class="text-xs tracking-wide text-sky-500 font-extrabold mb-4 font-vietnam">
+                    Rất mong sự hiện diện của Anh/Chị
+                </p>
+                <div id="cardGuestName" class="text-3xl sm:text-4xl font-extrabold text-sky-900 mb-5 capitalize">
+                    [HỌ VÀ TÊN]
+                </div>
+                <div class="flex justify-center">
+                    <span id="cardBadge" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold text-white bg-sky-500 shadow-md">
+                        <!-- Badge injected by JS -->
+                    </span>
+                </div>
+            </div>
+
+            <!-- Content Letter -->
+            <div class="max-w-3xl mx-auto text-sm text-slate-600 leading-relaxed text-justify mb-10 space-y-4 font-medium px-2">
+                <p><strong>Dạ em chào Anh/Chị,</strong> 👋</p>
+                <p>
+                    Lại một mùa tuyển chọn Cộng tác viên nữa qua đi, và đại gia đình Ban Phong trào - Tình nguyện vô cùng háo hức đón chào thêm những gương mặt mới cực kỳ đáng yêu và nhiệt huyết.
+                </p>
+                <p>
+                    Nhân dịp đặc biệt này, tụi em trân trọng kính mời Anh/Chị – những tiền bối siêu xịn sò đã đặt nền móng và truyền lửa cho thế hệ hôm nay – cùng về chung vui trong <strong>Buổi Gặp Mặt Tân CTV 2026</strong>. Sự có mặt của Anh/Chị chắc chắn sẽ làm buổi tiệc thêm phần ấm áp và ý nghĩa lắm luôn đó ạ! 💙
+                </p>
+            </div>
+
+            <!-- Event Details Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <div class="bg-sky-50/50 p-5 rounded-[28px] border-2 border-sky-100 shadow-sm flex flex-col items-center text-center gap-2 hover:-translate-y-1 transition-transform">
+                    <div class="text-3xl mb-1">⏰</div>
+                    <div>
+                        <span class="text-[10px] font-extrabold tracking-wide text-sky-400 block mb-1">Thời gian</span>
+                        <span class="font-extrabold text-lg text-sky-900 block">19g00</span>
+                        <span class="text-[11px] text-sky-600 block mt-1 font-bold">Thứ Bảy, 03/10/2026</span>
+                    </div>
+                </div>
+                <div class="bg-pink-50/50 p-5 rounded-[28px] border-2 border-pink-100 shadow-sm flex flex-col items-center text-center gap-2 hover:-translate-y-1 transition-transform">
+                    <div class="text-3xl mb-1">📍</div>
+                    <div>
+                        <span class="text-[10px] font-extrabold tracking-wide text-pink-400 block mb-1">Địa điểm</span>
+                        <span class="font-extrabold text-lg text-pink-900 block leading-tight">Nhà hàng<br/>Hương Biển</span>
+                        <span class="text-[11px] text-pink-600 block mt-1 font-bold">Số 10 Đ. Số 7, Thủ Đức</span>
+                    </div>
+                </div>
+                <div class="bg-sky-50/50 p-5 rounded-[28px] border-2 border-sky-100 shadow-sm flex flex-col items-center text-center gap-2 hover:-translate-y-1 transition-transform">
+                    <div class="text-3xl mb-1">👕</div>
+                    <div>
+                        <span class="text-[10px] font-extrabold tracking-wide text-sky-400 block mb-1">Trang phục</span>
+                        <span class="font-extrabold text-lg text-sky-900 block">Áo Đoàn Khoa</span>
+                        <span class="text-[11px] text-sky-600 block mt-1 font-bold">Thoải mái, xinh xắn</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Closing -->
+            <div class="text-center pt-6 border-t-2 border-dashed border-sky-100">
+                <p class="font-extrabold text-lg text-sky-900 mb-1">
+                    Tụi em rất mong được gặp Anh/Chị! 🥰
+                </p>
+                <p class="text-[11px] font-bold text-sky-500 tracking-wide mt-2 font-vietnam">
+                    Ban Phong trào - Tình nguyện 🐳
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Utilities Box -->
+    <div class="mt-6 space-y-4 no-print px-1">
+        <button id="rsvpButton" onclick="confirmRsvpParticipation()"
+            class="w-full bg-gradient-to-r from-sky-400 to-pink-400 hover:from-sky-300 hover:to-pink-300 text-white font-extrabold py-4 px-6 rounded-[30px] shadow-[0_10px_30px_rgba(236,72,153,0.3)] transform active:scale-[0.98] transition-all flex items-center justify-center gap-3 cursor-pointer border-2 border-white">
+            <span class="text-xl">💌</span>
+            <span id="rsvpButtonLabel" class="tracking-wide text-xs sm:text-sm">Xác Nhận Có Mặt Nè!</span>
+        </button>
+
+        <button onclick="syncWithGoogleCalendar()"
+            class="w-full bg-white/90 hover:bg-white text-sky-900 font-extrabold py-3.5 px-6 rounded-[30px] backdrop-blur-md border-2 border-white shadow-xl transform active:scale-[0.98] transition-all flex items-center justify-center gap-3 cursor-pointer">
+            <span class="text-lg">🗓️</span>
+            <span class="tracking-wide text-xs sm:text-sm">Lưu Lịch: 19h00 Ngày 03/10/2026</span>
+        </button>
+
+        <div class="text-center text-sky-900 bg-white/80 backdrop-blur-md px-6 py-2 rounded-full inline-block border border-white text-[11px] sm:text-xs font-bold tracking-wide mt-6 pb-2">
+            🐳 #PhongTinhwithlove - Hẹn gặp Anh/Chị nha!
+            <button onclick="launchRoyalCelebration()"
+                class="ml-2 text-pink-500 hover:text-pink-600 underline cursor-pointer font-extrabold">Bắn pháo hoa 🎉</button>
+        </div>
+    </div>
+</main>
+`;
+
+html = html.slice(0, startIndex) + newHTML + html.slice(endIndex);
+
+// Re-write JS badges and toast to cute emojis
+html = html.replace(/\`<span>✦<\/span><span>Hành Tinh Tiền Bối K23<\/span>\`/g, "\`<span>🌟</span><span>Bậc Tôn Đáng Yêu K23</span>\`");
+html = html.replace(/\`<span>💫<\/span><span>Hành Tinh Tiền Bối K24<\/span>\`/g, "\`<span>🍓</span><span>Tiền Bối Dễ Thương K24</span>\`");
+html = html.replace(/Trân trọng kính chào Anh \/ Chị \${matchedGuest.name}!`, "🚀"/g, "Trân trọng kính chào Anh / Chị \${matchedGuest.name}!`, \"🥰\"");
+
+fs.writeFileSync('index.html', html);
+console.log('Restored CUTE theme with Dreamy Stars!');
